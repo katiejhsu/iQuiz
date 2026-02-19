@@ -18,7 +18,7 @@ class QuestionController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        questionLabel.text = "Hardcoded Question 1"
+        questionLabel.text = "Hardcoded Question 1 Text"
         let option1 = UIAction(title: "The Correct Answer") { action in
             self.selectedAnswer = action.title
             self.answerChoices.setTitle(action.title, for: .normal)

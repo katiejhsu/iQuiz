@@ -24,7 +24,7 @@ class FinishedController: UIViewController {
         if finalScore == totalQuestions {
             descriptionLabel.text = "Perfect!"
         } else {
-            descriptionLabel.text = "Keep practicing!"
+            descriptionLabel.text = "Almost!"
         }
     }
 }
