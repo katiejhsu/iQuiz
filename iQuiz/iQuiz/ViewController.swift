@@ -14,10 +14,16 @@ class ViewController: UIViewController, UITableViewDataSource {
     
     //in-memory array for testing
     let quizzes = [
-            (title: "Mathematics", desc: "Math Quiz on Algebra + Geometry."),
-            (title: "Marvel Super Heroes", desc: "Superhero Quiz on Superman and Ironman"),
-            (title: "Science", desc: "Science Quiz on Physics and Biology")
-        ]
+        (title: "Mathematics", desc: "Math Quiz on Algebra + Geometry."),
+        (title: "Marvel Super Heroes", desc: "Superhero Quiz on Superman and Ironman"),
+        (title: "Science", desc: "Science Quiz on Physics and Biology")
+    ]
+    
+    let questions = [
+        (question: "Test Math Question", ans1: "mathans1", ans2: "mathans2"),
+        (question: "Test Marvel Question", ans1: "marvelans1", ans2: "marvelans2"),
+        (question: "Test Science Question", ans1: "scienceans1", ans2: "scienceans2"),
+    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +36,9 @@ class ViewController: UIViewController, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return quizzes.count
     }
+    // closes the old screen instead of piling a new one over the old one
+    @IBAction func unwindToMain(segue: UIStoryboardSegue) {}
+    
     @IBAction func settingsPressed(_ sender: Any) {
         let alert = UIAlertController(title: "Settings", message: "Settings go here", preferredStyle: .alert)
         // ok button
