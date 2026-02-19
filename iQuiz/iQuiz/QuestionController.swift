@@ -20,6 +20,11 @@ class QuestionController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+        swipeRight.direction = UISwipeGestureRecognizer.Direction.right
+  
+        view.addGestureRecognizer(swipeRight)
+        
         questionLabel.text = "Hardcoded Question 1 Text"
         let option1 = UIAction(title: "The Correct Answer") { action in
             self.selectedAnswer = action.title
@@ -45,6 +50,9 @@ class QuestionController: UIViewController {
                 guard let action = action as? UIAction else { return }
                 action.state = (action.title == selectedTitle) ? .on : .off
             }
+        }
+    @objc func handleSwipe() {
+            performSegue(withIdentifier: "showAnswer", sender: self)
         }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? AnswerController {

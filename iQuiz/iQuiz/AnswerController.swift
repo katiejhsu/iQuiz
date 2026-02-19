@@ -22,6 +22,10 @@ class AnswerController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+                swipeRight.direction = UISwipeGestureRecognizer.Direction.right
+                view.addGestureRecognizer(swipeRight)
+        
         questionLabel.text = questionReceived
         
         // Update labels based on the data passed
@@ -41,5 +45,9 @@ class AnswerController: UIViewController {
                 destination.finalScore = self.currentScore
                 destination.totalQuestionsAnswered = self.totalAnswered
             }
+        }
+    @objc func handleSwipe() {
+            
+            performSegue(withIdentifier: "showFinished", sender: self)
         }
 }
