@@ -14,6 +14,8 @@ class QuestionController: UIViewController {
     // code
     
     var selectedAnswer: String = ""
+    var currentScore: Int = 0
+    var totalAnswered: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,9 +50,11 @@ class QuestionController: UIViewController {
         if let destination = segue.destination as? AnswerController {
             destination.userPick = self.selectedAnswer
             destination.correctAnswer = "The Correct Answer"
-            
-            // Pass the question text to satisfy the rubric
             destination.questionReceived = self.questionLabel.text
+            
+            destination.currentScore = self.currentScore
+            // increment the total so it equals 1 for the first question
+            destination.totalAnswered = self.totalAnswered + 1
         }
     }
 }

@@ -12,19 +12,18 @@ class FinishedController: UIViewController {
     @IBOutlet weak var descriptionLabel: UILabel!
     
     var finalScore: Int = 0
-    let totalQuestions: Int = 1 // hardcoded 1 question
-
+    var totalQuestionsAnswered: Int = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Requirement: Display score (x of y)
-        scoreLabel.text = "\(finalScore) of \(totalQuestions) correct"
+
+        scoreLabel.text = "\(finalScore) of \(totalQuestionsAnswered) correct"
         
-        // Requirement: Descriptive text
-        if finalScore == totalQuestions {
-            descriptionLabel.text = "Perfect!"
-        } else {
-            descriptionLabel.text = "Almost!"
-        }
+        if finalScore == totalQuestionsAnswered && totalQuestionsAnswered > 0 {
+                descriptionLabel.text = "Perfect!"
+            } else {
+                descriptionLabel.text = "Almost!"
+            }
     }
 }

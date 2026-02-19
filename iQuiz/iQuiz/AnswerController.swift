@@ -17,7 +17,7 @@ class AnswerController: UIViewController {
     var userPick: String?
     var correctAnswer: String?
     var currentScore: Int = 0
-    var totalScore: Int = 0
+    var totalAnswered: Int = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +39,7 @@ class AnswerController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
             if let destination = segue.destination as? FinishedController {
                 destination.finalScore = self.currentScore
+                destination.totalQuestionsAnswered = self.totalAnswered
             }
         }
 }
