@@ -4,5 +4,5 @@ The scoring and data-passing logic is fully implemented and functional. However 
 In Part 3 where multiple questions per quiz is created, the existing score-tracking logic will accummulate points across the entire set.
 
 Extra Credit Completed:
-1. Swipe right
+1. Swipe right (on question and answer scene as specified (not finished scene))
 2. Discoverability (for the swipe right functionality)
