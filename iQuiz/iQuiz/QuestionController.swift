@@ -18,26 +18,39 @@ class QuestionController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        questionLabel.text = "testQuestion"
-        let option1 = UIAction(title: "CorrectAns") { action in
+        questionLabel.text = "Hardcoded Question 1"
+        let option1 = UIAction(title: "The Correct Answer") { action in
             self.selectedAnswer = action.title
             self.answerChoices.setTitle(action.title, for: .normal)
+            // update checkmarks
+            self.updateMenuSelection(selectedTitle: action.title)
         }
-        let option2 = UIAction(title: "IncorrectAns") { action in
+        let option2 = UIAction(title: "The Incorrect Answer") { action in
             self.selectedAnswer = action.title
             self.answerChoices.setTitle(action.title, for: .normal)
+            // updated checkmarks
+            self.updateMenuSelection(selectedTitle: action.title)
         }
         
         answerChoices.menu = UIMenu(children: [option1, option2])
         answerChoices.showsMenuAsPrimaryAction = true
         answerChoices.changesSelectionAsPrimaryAction = false
         
-        answerChoices.setTitle("Click for answer choices", for: .normal)
+        answerChoices.setTitle("Click Me for Answer Choices:", for: .normal)
     }
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if let destination = segue.destination as? AnswerController {
-                destination.userPick = self.selectedAnswer
-                destination.correctAnswer = "CorrectAns" // Hardcoded for this draft
+    func updateMenuSelection(selectedTitle: String) {
+            answerChoices.menu?.children.forEach { action in
+                guard let action = action as? UIAction else { return }
+                action.state = (action.title == selectedTitle) ? .on : .off
             }
         }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destination = segue.destination as? AnswerController {
+            destination.userPick = self.selectedAnswer
+            destination.correctAnswer = "The Correct Answer"
+            
+            // Pass the question text to satisfy the rubric
+            destination.questionReceived = self.questionLabel.text
+        }
+    }
 }

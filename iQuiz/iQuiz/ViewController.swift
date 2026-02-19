@@ -18,12 +18,6 @@ class ViewController: UIViewController, UITableViewDataSource {
         (title: "Marvel Super Heroes", desc: "Superhero Quiz on Superman and Ironman"),
         (title: "Science", desc: "Science Quiz on Physics and Biology")
     ]
-    
-    let questions = [
-        (question: "Test Math Question", ans1: "mathans1", ans2: "mathans2"),
-        (question: "Test Marvel Question", ans1: "marvelans1", ans2: "marvelans2"),
-        (question: "Test Science Question", ans1: "scienceans1", ans2: "scienceans2"),
-    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
