@@ -46,7 +46,7 @@ class ViewController: UIViewController, UITableViewDataSource {
             
         // match identifiers hardcoded in storyboard
         switch indexPath.row {
-        case 0: identifier = "math"  // Changed from MathCell to math
+        case 0: identifier = "math"  
         case 1: identifier = "marvel"
         case 2: identifier = "science"
         default: identifier = "math"
