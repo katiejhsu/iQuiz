@@ -22,7 +22,8 @@ class ViewController: UIViewController, UITableViewDataSource {
         tableView.dataSource = self
         
         // download json
-        fetchData(from: "http://tednewardsandbox.site44.com/questions.json")
+        let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
+        fetchData(from: url)
     }
     
     // for correct num of cells requirement
@@ -79,6 +80,19 @@ class ViewController: UIViewController, UITableViewDataSource {
         let quiz = quizzes[indexPath.row]
         cell.textLabel?.text = quiz.title
         cell.detailTextLabel?.text = quiz.desc
+        
+        var imageName = ""
+                switch quiz.title {
+                case "Mathematics":
+                    imageName = "math"
+                case "Marvel Super Heroes":
+                    imageName = "marvel"
+                case "Science!":
+                    imageName = "science"
+                default:
+                    imageName = "math"
+                }
+                cell.imageView?.image = UIImage(named: imageName)
         
         return cell
     }
