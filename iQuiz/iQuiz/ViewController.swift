@@ -13,17 +13,16 @@ class ViewController: UIViewController, UITableViewDataSource {
     
     
     //in-memory array for testing
-    let quizzes = [
-        (title: "Mathematics", desc: "Math Quiz on Algebra + Geometry."),
-        (title: "Marvel Super Heroes", desc: "Superhero Quiz on Superman and Ironman"),
-        (title: "Science", desc: "Science Quiz on Physics and Biology")
-    ]
+    var quizzes: [QuizTopic] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // use this file for data
         tableView.dataSource = self
+        
+        // download json
+        fetchData(from: "http://tednewardsandbox.site44.com/questions.json")
     }
     
     // for correct num of cells requirement
@@ -34,14 +33,31 @@ class ViewController: UIViewController, UITableViewDataSource {
     @IBAction func unwindToMain(segue: UIStoryboardSegue) {}
     
     @IBAction func settingsPressed(_ sender: Any) {
-        let alert = UIAlertController(title: "Settings", message: "Settings go here", preferredStyle: .alert)
-        // ok button
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        let alert = UIAlertController(title: "Settings", message: "Enter Quiz URL", preferredStyle: .alert)
+            
+            // Add a url field to the popup for alt sources (default to the curr quiz json)
+            alert.addTextField { (textField) in
+                textField.text = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
+            }
+
+        // check now button for updates
+            alert.addAction(UIAlertAction(title: "Check Now", style: .default, handler: { [weak alert] (_) in
+                if let newURL = alert?.textFields?[0].text {
+                    // save the new url
+                    // settings persistence requirement
+                    UserDefaults.standard.set(newURL, forKey: "quiz_url")
+                    // fetch the data from new url
+                    self.fetchData(from: newURL)
+                }
+            }))
+            
+            // cancel button
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            self.present(alert, animated: true)
     }
     
     //display the table
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    /* func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let identifier: String
             
         // match identifiers hardcoded in storyboard
@@ -54,7 +70,54 @@ class ViewController: UIViewController, UITableViewDataSource {
             
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
             return cell
-        }
+    } */
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // Use a generic identifier (make sure one cell in Storyboard has this ID)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "quizCell", for: indexPath)
+        
+        let quiz = quizzes[indexPath.row]
+        cell.textLabel?.text = quiz.title
+        cell.detailTextLabel?.text = quiz.desc
+        
+        return cell
+    }
+    
+    // fetches data from site
+    func fetchData(from urlString: String) {
+        guard let url = URL(string: urlString) else { return }
 
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            // If an error occurs (like no internet), give notification for network issues
+            if let error = error {
+                DispatchQueue.main.async {
+                    // popup error to notify for network issues
+                    let alert = UIAlertController(
+                        title: "Network Error",
+                        message: error.localizedDescription,
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true)
+                }
+                return
+            }
+
+            guard let jsonData = data else { return }
+
+            let decoder = JSONDecoder()
+            do {
+                let decodedQuizzes = try decoder.decode([QuizTopic].self, from: jsonData)
+
+                DispatchQueue.main.async {
+                    self.quizzes = decodedQuizzes
+                    self.tableView.reloadData()
+                }
+            } catch {
+                print("JSON Decoding Error: \(error)")
+            }
+        }.resume()
+    }
+    
 }
 
