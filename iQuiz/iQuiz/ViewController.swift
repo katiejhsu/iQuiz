@@ -19,11 +19,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             super.viewDidLoad()
             tableView.dataSource = self
             
-            // 2. Add this line so clicks trigger didSelectRowAt
+            // clicks trigger didSelectRowAt
             tableView.delegate = self
             
             let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
             fetchData(from: url)
+        
+        // test offline-> gives json file directory
+        print("File Path: \(getFilePath())")
         }
     
     // for if a user changes url in settings app then comes back to app
@@ -35,10 +38,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // perform the segue
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // This tells the grey segue to start when a row is tapped
         performSegue(withIdentifier: "showQuestion", sender: self)
         
-        // Deselect the row so it doesn't stay gray
+        // deselect the row so it doesn't stay gray
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -57,7 +59,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // Use a generic identifier (make sure one cell in Storyboard has this ID)
+        // use a generic identifier
         let cell = tableView.dequeueReusableCell(withIdentifier: "quizCell", for: indexPath)
         
         let quiz = quizzes[indexPath.row]
@@ -84,7 +86,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         guard let url = URL(string: urlString) else { return }
 
         URLSession.shared.dataTask(with: url) { (data, response, error) in
-            // If internet fails, try to load the local file
+            // if internet fails, try to load the local file
             if let networkError = error {
                 print("Network Error: \(networkError.localizedDescription)")
                 self.loadLocalData()
@@ -96,7 +98,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                 do {
                     let decodedQuizzes = try decoder.decode([QuizTopic].self, from: jsonData)
                     
-                    // Success! Save this data for offline use
+                    // save this data for offline use
                     self.saveDataToDisk(jsonData)
 
                     DispatchQueue.main.async {
@@ -105,11 +107,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                     }
                 } catch {
                     print("Decoding Error: \(error)")
-                    self.loadLocalData() // Fallback if the JSON itself is broken
+                    self.loadLocalData() // fallback if the JSON itself is broken
                 }
             }
         }.resume()
     }
+    
     // helper funcs for offline
     func getFilePath() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)

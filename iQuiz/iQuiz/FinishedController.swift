@@ -10,22 +10,21 @@ import UIKit
 class FinishedController: UIViewController {
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
-    
-    // Properties to receive the final tally
+
         var finalScore: Int = 0
         var totalQuestionsAnswered: Int = 0
         
         override func viewDidLoad() {
             super.viewDidLoad()
             
-            // 1. Update the score text based on dynamic JSON data
+            // update the score text based on dynamic JSON data
             scoreLabel.text = "You got \(finalScore) out of \(totalQuestionsAnswered) correct!"
             
-            // 2. Logic for custom messages
+            // custom messages
             if finalScore == totalQuestionsAnswered && totalQuestionsAnswered > 0 {
-                descriptionLabel.text = "Perfect! You're a genius!"
+                descriptionLabel.text = "Perfect!"
             } else if finalScore > (totalQuestionsAnswered / 2) {
-                descriptionLabel.text = "Almost! So close!"
+                descriptionLabel.text = "Almost!"
             } else {
                 descriptionLabel.text = "Better luck next time!"
             }

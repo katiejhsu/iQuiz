@@ -17,7 +17,7 @@ class QuestionController: UIViewController {
         var questionIndex: Int = 0
         var currentScore: Int = 0
         
-        var selectedAnswerIndex: Int? // Track the index (1, 2, 3, or 4) to compare with JSON
+        var selectedAnswerIndex: Int? // track the index to compare with JSON
         var selectedAnswerText: String = ""
 
         override func viewDidLoad() {
@@ -31,16 +31,16 @@ class QuestionController: UIViewController {
             guard let currentQuiz = quiz else { return }
             let questionData = currentQuiz.questions[questionIndex]
             
-            // 1. Set the Question Text
+            // set the question text
             questionLabel.text = questionData.text
             
-            // 2. Build the menu options dynamically from the JSON array
+            // build the menu from the JSON array
             var menuOptions: [UIAction] = []
             
             for (index, answerText) in questionData.answers.enumerated() {
                 let action = UIAction(title: answerText) { action in
                     self.selectedAnswerText = action.title
-                    self.selectedAnswerIndex = index + 1 // JSON answers are usually 1-indexed
+                    self.selectedAnswerIndex = index + 1 // JSON answer 1-indexed
                     self.answerChoices.setTitle(action.title, for: .normal)
                     self.updateMenuSelection(selectedTitle: action.title)
                 }
@@ -65,7 +65,7 @@ class QuestionController: UIViewController {
             if selectedAnswerIndex != nil {
                 performSegue(withIdentifier: "showAnswer", sender: self)
             } else {
-                // Optional: alert the user to pick an answer first
+                
             }
         }
 
@@ -78,7 +78,7 @@ class QuestionController: UIViewController {
         override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
             if let destination = segue.destination as? AnswerController {
                 guard let currentQuiz = quiz,
-                              let selectedIdx = selectedAnswerIndex else { return } // Stop if index is nil
+                    let selectedIdx = selectedAnswerIndex else { return } // Stop if index is nil
                 let questionData = currentQuiz.questions[questionIndex]
                 
                 // Pass the data to the Answer screen
@@ -87,7 +87,7 @@ class QuestionController: UIViewController {
                 destination.userPick = self.selectedAnswerText
                 
                 // Get the correct answer text using the 'answer' index from JSON
-                let correctIdx = Int(questionData.answer)! - 1 // convert "1" to index 0
+                let correctIdx = Int(questionData.answer)! - 1 // convert 1 to index 0
                 destination.correctAnswer = questionData.answers[correctIdx]
                 
                 destination.questionReceived = questionData.text
@@ -102,9 +102,9 @@ class QuestionController: UIViewController {
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         if identifier == "showAnswer" {
             if selectedAnswerIndex != nil {
-                return true // Let the segue happen
+                return true // let the segue happen
             } else {
-                // Stop the segue and alert the user
+                // stop the segue and alert the user if no answer selected
                 let alert = UIAlertController(
                     title: "Selection Required",
                     message: "Please select an answer before moving to the next screen.",
@@ -113,7 +113,7 @@ class QuestionController: UIViewController {
                 alert.addAction(UIAlertAction(title: "OK", style: .default))
                 self.present(alert, animated: true)
                 
-                return false // This is the magic line that stops the transition
+                return false // stops the transition
             }
         }
         return true
