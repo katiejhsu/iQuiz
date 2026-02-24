@@ -58,16 +58,32 @@ class AnswerController: UIViewController {
             }
         }
 
-        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if let destination = segue.destination as? FinishedController {
-                destination.finalScore = self.currentScore
-                // Use the total from the JSON so it's not hardcoded
-                destination.totalQuestionsAnswered = quiz?.questions.count ?? totalAnswered
-            } else if let dest = segue.destination as? QuestionController {
-                // Pass the data back to loop to the next question
-                dest.quiz = self.quiz
-                dest.questionIndex = self.questionIndex + 1
-                dest.currentScore = self.currentScore
-            }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "backToQuestion",
+           let dest = segue.destination as? QuestionController {
+            // Pass the quiz data along
+            dest.quiz = self.quiz
+            // Advance the index by 1 so the next question shows
+            dest.questionIndex = self.questionIndex + 1
+            // Keep the current score
+            dest.currentScore = self.currentScore
+        } else if segue.identifier == "showFinished",
+                  let dest = segue.destination as? FinishedController {
+            // Send the final score to the results screen
+            dest.finalScore = self.currentScore
+                dest.totalQuestionsAnswered = quiz?.questions.count ?? totalAnswered
         }
+    }
+    @IBAction func nextButtonPressed(_ sender: Any) {
+        guard let totalQuestions = quiz?.questions.count else { return }
+        
+        // Check if the current question is NOT the last one
+        if questionIndex + 1 < totalQuestions {
+            // Go back to the Question screen
+            performSegue(withIdentifier: "backToQuestion", sender: self)
+        } else {
+            // Go to the final Finished screen
+            performSegue(withIdentifier: "showFinished", sender: self)
+        }
+    }
 }

@@ -181,6 +181,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Next"/>
                                 <connections>
+                                    <action selector="nextButtonPressed:" destination="B54-ie-Nzv" eventType="touchUpInside" id="kAo-ce-XhV"/>
                                     <segue destination="RRq-Eq-TaM" kind="presentation" identifier="showFinished" id="PZf-8l-Vw1"/>
                                 </connections>
                             </button>
@@ -208,6 +209,7 @@
                         <outlet property="correctLabel" destination="qSD-Wl-N9c" id="Ynx-LC-7dP"/>
                         <outlet property="questionLabel" destination="S6I-VM-F5F" id="eNx-9J-vtr"/>
                         <outlet property="resultLabel" destination="HTH-vc-fv3" id="ykv-9E-E4z"/>
+                        <segue destination="F7W-Cc-yE0" kind="presentation" identifier="backToQuestion" id="Iok-IY-3Nx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fe7-HL-SCy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -220,7 +222,7 @@
             <objects>
                 <viewController id="RRq-Eq-TaM" customClass="FinishedController" customModule="iQuiz" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="m5f-hK-ySC">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="783"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="793"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="User Score: x/y correct" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c1z-P4-g8g">
@@ -270,6 +272,9 @@
             <point key="canvasLocation" x="2293.8931297709923" y="112.67605633802818"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="Iok-IY-3Nx"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
