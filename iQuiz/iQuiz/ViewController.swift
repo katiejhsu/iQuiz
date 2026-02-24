@@ -52,8 +52,8 @@ class ViewController: UIViewController, UITableViewDataSource {
                 }
             }))
             
-            // cancel button
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            // back/cancel button
+            alert.addAction(UIAlertAction(title: "Back/Cancel", style: .cancel))
             self.present(alert, animated: true)
     }
     
