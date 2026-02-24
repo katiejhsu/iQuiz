@@ -57,22 +57,6 @@ class ViewController: UIViewController, UITableViewDataSource {
             self.present(alert, animated: true)
     }
     
-    //display the table
-    /* func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let identifier: String
-            
-        // match identifiers hardcoded in storyboard
-        switch indexPath.row {
-        case 0: identifier = "math"  
-        case 1: identifier = "marvel"
-        case 2: identifier = "science"
-        default: identifier = "math"
-        }
-            
-        let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
-            return cell
-    } */
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // Use a generic identifier (make sure one cell in Storyboard has this ID)
         let cell = tableView.dequeueReusableCell(withIdentifier: "quizCell", for: indexPath)
@@ -98,39 +82,75 @@ class ViewController: UIViewController, UITableViewDataSource {
     }
     
     // fetches data from site
-    func fetchData(from urlString: String) {
-        guard let url = URL(string: urlString) else { return }
+        func fetchData(from urlString: String) {
+            guard let url = URL(string: urlString) else { return }
 
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            // If an error occurs (like no internet), give notification for network issues
-            if let error = error {
-                DispatchQueue.main.async {
-                    // popup error to notify for network issues
-                    let alert = UIAlertController(
-                        title: "Network Error",
-                        message: error.localizedDescription,
-                        preferredStyle: .alert
-                    )
-                    alert.addAction(UIAlertAction(title: "OK", style: .default))
-                    self.present(alert, animated: true)
+            URLSession.shared.dataTask(with: url) { (data, response, error) in
+                // PART 1: OFFLINE FALLBACK
+                // If an error occurs (like no internet), check local storage
+                if let networkError = error {
+                    print("Network Error: \(networkError.localizedDescription)") // Uses error to avoid warning
+                    
+                    // Try to load from the local JSON file
+                    if let localData = try? Data(contentsOf: self.getFilePath()),
+                       let decoded = try? JSONDecoder().decode([QuizTopic].self, from: localData) {
+                        
+                        DispatchQueue.main.async {
+                            self.quizzes = decoded
+                            self.tableView.reloadData()
+                        }
+                    } else {
+                        // ONLY show popup if BOTH network and local storage fail
+                        DispatchQueue.main.async {
+                            let alert = UIAlertController(title: "No Connection",
+                                                          message: "Please connect to the internet to download quizzes.",
+                                                          preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .default))
+                            self.present(alert, animated: true)
+                        }
+                    }
+                    return
                 }
-                return
-            }
 
-            guard let jsonData = data else { return }
+                guard let jsonData = data else { return }
 
-            let decoder = JSONDecoder()
-            do {
-                let decodedQuizzes = try decoder.decode([QuizTopic].self, from: jsonData)
-
-                DispatchQueue.main.async {
-                    self.quizzes = decodedQuizzes
-                    self.tableView.reloadData()
+                let decoder = JSONDecoder()
+                do {
+                    let decodedQuizzes = try decoder.decode([QuizTopic].self, from: jsonData)
+                    
+                    // PART 2: SAVE FOR OFFLINE
+                    // save downloaded data to disk for future offline use
+                    self.saveDataToDisk(jsonData)
+                    
+                    DispatchQueue.main.async {
+                        self.quizzes = decodedQuizzes
+                        self.tableView.reloadData()
+                    }
+                } catch {
+                    print("JSON Decoding Error: \(error)")
+                    // Optional: Fallback to local data if the new download is corrupted
+                    self.loadLocalData()
                 }
-            } catch {
-                print("JSON Decoding Error: \(error)")
+            }.resume()
+        }
+    // helper funcs for offline
+    func getFilePath() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0].appendingPathComponent("quizzes.json")
+    }
+
+    func saveDataToDisk(_ data: Data) {
+        try? data.write(to: getFilePath())
+    }
+
+    func loadLocalData() {
+        if let localData = try? Data(contentsOf: getFilePath()),
+           let decoded = try? JSONDecoder().decode([QuizTopic].self, from: localData) {
+            DispatchQueue.main.async {
+                self.quizzes = decoded
+                self.tableView.reloadData()
             }
-        }.resume()
+        }
     }
     
 }
