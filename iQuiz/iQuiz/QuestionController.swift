@@ -77,7 +77,8 @@ class QuestionController: UIViewController {
 
         override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
             if let destination = segue.destination as? AnswerController {
-                guard let currentQuiz = quiz else { return }
+                guard let currentQuiz = quiz,
+                              let selectedIdx = selectedAnswerIndex else { return } // Stop if index is nil
                 let questionData = currentQuiz.questions[questionIndex]
                 
                 // Pass the data to the Answer screen
@@ -97,4 +98,24 @@ class QuestionController: UIViewController {
                 destination.totalAnswered = self.questionIndex + 1
             }
         }
+    // wont submit if nil
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if identifier == "showAnswer" {
+            if selectedAnswerIndex != nil {
+                return true // Let the segue happen
+            } else {
+                // Stop the segue and alert the user
+                let alert = UIAlertController(
+                    title: "Selection Required",
+                    message: "Please select an answer before moving to the next screen.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+                
+                return false // This is the magic line that stops the transition
+            }
+        }
+        return true
+    }
 }
