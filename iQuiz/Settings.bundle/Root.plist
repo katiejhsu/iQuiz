@@ -7,14 +7,14 @@
 	<key>PreferenceSpecifiers</key>
 	<array>
 		<dict>
-			<key>http://tednewardsandbox.site44.com/questions.json</key>
-			<string></string>
+			<key>DefaultValue</key>
+			<string>http://tednewardsandbox.site44.com/questions.json</string>
 			<key>Type</key>
 			<string>PSTextFieldSpecifier</string>
-			<key>Quiz URL</key>
-			<string></string>
-			<key>quiz_url</key>
-			<string></string>
+			<key>Title</key>
+			<string>Quiz URL</string>
+			<key>Key</key>
+			<string>quiz_url</string>
 		</dict>
 	</array>
 </dict>

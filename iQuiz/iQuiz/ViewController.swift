@@ -26,6 +26,13 @@ class ViewController: UIViewController, UITableViewDataSource {
         fetchData(from: url)
     }
     
+    // for if a user changes url in settings app then comes back to app
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
+        fetchData(from: url)
+    }
+    
     // for correct num of cells requirement
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return quizzes.count
@@ -34,27 +41,10 @@ class ViewController: UIViewController, UITableViewDataSource {
     @IBAction func unwindToMain(segue: UIStoryboardSegue) {}
     
     @IBAction func settingsPressed(_ sender: Any) {
-        let alert = UIAlertController(title: "Settings", message: "Enter Quiz URL", preferredStyle: .alert)
-            
-            // Add a url field to the popup for alt sources (default to the curr quiz json)
-            alert.addTextField { (textField) in
-                textField.text = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
-            }
-
-        // check now button for updates
-            alert.addAction(UIAlertAction(title: "Check Now", style: .default, handler: { [weak alert] (_) in
-                if let newURL = alert?.textFields?[0].text {
-                    // save the new url
-                    // settings persistence requirement
-                    UserDefaults.standard.set(newURL, forKey: "quiz_url")
-                    // fetch the data from new url
-                    self.fetchData(from: newURL)
-                }
-            }))
-            
-            // back/cancel button
-            alert.addAction(UIAlertAction(title: "Back/Cancel", style: .cancel))
-            self.present(alert, animated: true)
+        // replaced old popup code with link to settings bundle in apple settings
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -81,58 +71,36 @@ class ViewController: UIViewController, UITableViewDataSource {
         return cell
     }
     
-    // fetches data from site
-        func fetchData(from urlString: String) {
-            guard let url = URL(string: urlString) else { return }
+    func fetchData(from urlString: String) {
+        guard let url = URL(string: urlString) else { return }
 
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
-                // PART 1: OFFLINE FALLBACK
-                // If an error occurs (like no internet), check local storage
-                if let networkError = error {
-                    print("Network Error: \(networkError.localizedDescription)") // Uses error to avoid warning
-                    
-                    // Try to load from the local JSON file
-                    if let localData = try? Data(contentsOf: self.getFilePath()),
-                       let decoded = try? JSONDecoder().decode([QuizTopic].self, from: localData) {
-                        
-                        DispatchQueue.main.async {
-                            self.quizzes = decoded
-                            self.tableView.reloadData()
-                        }
-                    } else {
-                        // ONLY show popup if BOTH network and local storage fail
-                        DispatchQueue.main.async {
-                            let alert = UIAlertController(title: "No Connection",
-                                                          message: "Please connect to the internet to download quizzes.",
-                                                          preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "OK", style: .default))
-                            self.present(alert, animated: true)
-                        }
-                    }
-                    return
-                }
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            // If internet fails, try to load the local file
+            if let networkError = error {
+                print("Network Error: \(networkError.localizedDescription)")
+                self.loadLocalData()
+                return
+            }
 
-                guard let jsonData = data else { return }
-
+            if let jsonData = data {
                 let decoder = JSONDecoder()
                 do {
                     let decodedQuizzes = try decoder.decode([QuizTopic].self, from: jsonData)
                     
-                    // PART 2: SAVE FOR OFFLINE
-                    // save downloaded data to disk for future offline use
+                    // Success! Save this data for offline use
                     self.saveDataToDisk(jsonData)
-                    
+
                     DispatchQueue.main.async {
                         self.quizzes = decodedQuizzes
                         self.tableView.reloadData()
                     }
                 } catch {
-                    print("JSON Decoding Error: \(error)")
-                    // Optional: Fallback to local data if the new download is corrupted
-                    self.loadLocalData()
+                    print("Decoding Error: \(error)")
+                    self.loadLocalData() // Fallback if the JSON itself is broken
                 }
-            }.resume()
-        }
+            }
+        }.resume()
+    }
     // helper funcs for offline
     func getFilePath() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -151,6 +119,11 @@ class ViewController: UIViewController, UITableViewDataSource {
                 self.tableView.reloadData()
             }
         }
+    }
+    func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
     }
     
 }
