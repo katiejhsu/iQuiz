@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -16,21 +16,30 @@ class ViewController: UIViewController, UITableViewDataSource {
     var quizzes: [QuizTopic] = []
 
     override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        // use this file for data
-        tableView.dataSource = self
-        
-        // download json
-        let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
-        fetchData(from: url)
-    }
+            super.viewDidLoad()
+            tableView.dataSource = self
+            
+            // 2. Add this line so clicks trigger didSelectRowAt
+            tableView.delegate = self
+            
+            let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
+            fetchData(from: url)
+        }
     
     // for if a user changes url in settings app then comes back to app
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let url = UserDefaults.standard.string(forKey: "quiz_url") ?? "http://tednewardsandbox.site44.com/questions.json"
         fetchData(from: url)
+    }
+    
+    // perform the segue
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // This tells the grey segue to start when a row is tapped
+        performSegue(withIdentifier: "showQuestion", sender: self)
+        
+        // Deselect the row so it doesn't stay gray
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // for correct num of cells requirement
@@ -124,6 +133,16 @@ class ViewController: UIViewController, UITableViewDataSource {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         self.present(alert, animated: true)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showQuestion",
+           let dest = segue.destination as? QuestionController,
+           let indexPath = tableView.indexPathForSelectedRow {
+            dest.quiz = quizzes[indexPath.row]
+            dest.questionIndex = 0
+            dest.currentScore = 0
+        }
     }
     
 }

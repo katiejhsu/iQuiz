@@ -63,9 +63,6 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
-                                        <connections>
-                                            <segue destination="F7W-Cc-yE0" kind="presentation" id="ujL-po-Rmk"/>
-                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
@@ -75,7 +72,7 @@
                     </view>
                     <connections>
                         <outlet property="tableView" destination="vWx-Aa-3AU" id="Xiw-qm-rS0"/>
-                        <segue destination="F7W-Cc-yE0" kind="presentation" id="TQK-fh-pyS"/>
+                        <segue destination="F7W-Cc-yE0" kind="presentation" identifier="showQuestion" id="TQK-fh-pyS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -273,9 +270,6 @@
             <point key="canvasLocation" x="2293.8931297709923" y="112.67605633802818"/>
         </scene>
     </scenes>
-    <inferredMetricsTieBreakers>
-        <segue reference="TQK-fh-pyS"/>
-    </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

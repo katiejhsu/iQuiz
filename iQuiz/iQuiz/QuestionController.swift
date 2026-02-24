@@ -13,56 +13,88 @@ class QuestionController: UIViewController {
     @IBOutlet weak var answerChoices: UIButton!
     // code
     
-    var selectedAnswer: String = ""
-    var currentScore: Int = 0
-    var totalAnswered: Int = 0
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    var quiz: QuizTopic?
+        var questionIndex: Int = 0
+        var currentScore: Int = 0
         
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
-        swipeRight.direction = UISwipeGestureRecognizer.Direction.right
-  
-        view.addGestureRecognizer(swipeRight)
-        
-        questionLabel.text = "Hardcoded Question 1 Text"
-        let option1 = UIAction(title: "The Correct Answer") { action in
-            self.selectedAnswer = action.title
-            self.answerChoices.setTitle(action.title, for: .normal)
-            // update checkmarks
-            self.updateMenuSelection(selectedTitle: action.title)
-        }
-        let option2 = UIAction(title: "The Incorrect Answer") { action in
-            self.selectedAnswer = action.title
-            self.answerChoices.setTitle(action.title, for: .normal)
-            // updated checkmarks
-            self.updateMenuSelection(selectedTitle: action.title)
+        var selectedAnswerIndex: Int? // Track the index (1, 2, 3, or 4) to compare with JSON
+        var selectedAnswerText: String = ""
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            
+            setupSwipe()
+            loadQuestionData()
         }
         
-        answerChoices.menu = UIMenu(children: [option1, option2])
-        answerChoices.showsMenuAsPrimaryAction = true
-        answerChoices.changesSelectionAsPrimaryAction = false
-        
-        answerChoices.setTitle("Click Me for Answer Choices:", for: .normal)
-    }
-    func updateMenuSelection(selectedTitle: String) {
+        func loadQuestionData() {
+            guard let currentQuiz = quiz else { return }
+            let questionData = currentQuiz.questions[questionIndex]
+            
+            // 1. Set the Question Text
+            questionLabel.text = questionData.text
+            
+            // 2. Build the menu options dynamically from the JSON array
+            var menuOptions: [UIAction] = []
+            
+            for (index, answerText) in questionData.answers.enumerated() {
+                let action = UIAction(title: answerText) { action in
+                    self.selectedAnswerText = action.title
+                    self.selectedAnswerIndex = index + 1 // JSON answers are usually 1-indexed
+                    self.answerChoices.setTitle(action.title, for: .normal)
+                    self.updateMenuSelection(selectedTitle: action.title)
+                }
+                menuOptions.append(action)
+            }
+            
+            // 3. Attach the dynamic menu to the button
+            answerChoices.menu = UIMenu(children: menuOptions)
+            answerChoices.showsMenuAsPrimaryAction = true
+            answerChoices.setTitle("Select an Answer:", for: .normal)
+        }
+
+        func updateMenuSelection(selectedTitle: String) {
             answerChoices.menu?.children.forEach { action in
                 guard let action = action as? UIAction else { return }
                 action.state = (action.title == selectedTitle) ? .on : .off
             }
         }
-    @objc func handleSwipe() {
-            performSegue(withIdentifier: "showAnswer", sender: self)
+
+        @objc func handleSwipe() {
+            // Only allow swipe if an answer was picked
+            if selectedAnswerIndex != nil {
+                performSegue(withIdentifier: "showAnswer", sender: self)
+            } else {
+                // Optional: alert the user to pick an answer first
+            }
         }
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let destination = segue.destination as? AnswerController {
-            destination.userPick = self.selectedAnswer
-            destination.correctAnswer = "The Correct Answer"
-            destination.questionReceived = self.questionLabel.text
-            
-            destination.currentScore = self.currentScore
-            // increment the total so it equals 1 for the first question
-            destination.totalAnswered = self.totalAnswered + 1
+
+        func setupSwipe() {
+            let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+            swipeRight.direction = .right
+            view.addGestureRecognizer(swipeRight)
         }
-    }
+
+        override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if let destination = segue.destination as? AnswerController {
+                guard let currentQuiz = quiz else { return }
+                let questionData = currentQuiz.questions[questionIndex]
+                
+                // Pass the data to the Answer screen
+                destination.quiz = self.quiz
+                destination.questionIndex = self.questionIndex
+                destination.userPick = self.selectedAnswerText
+                
+                // Get the correct answer text using the 'answer' index from JSON
+                let correctIdx = Int(questionData.answer)! - 1 // convert "1" to index 0
+                destination.correctAnswer = questionData.answers[correctIdx]
+                
+                destination.questionReceived = questionData.text
+                
+                // Check if user was right and update score
+                let userIsCorrect = (String(self.selectedAnswerIndex!) == questionData.answer)
+                destination.currentScore = userIsCorrect ? (self.currentScore + 1) : self.currentScore
+                destination.totalAnswered = self.questionIndex + 1
+            }
+        }
 }
